@@ -107,19 +107,22 @@ function BatchLane({
         <div>
           <span>First response</span>
           <strong>
-            {finished ? `${result.firstLatency.toFixed(2)} s` : '—'}
+            {`${(started ? Math.min(time, result.firstLatency) : 0).toFixed(2)} s`}
           </strong>
         </div>
         <div>
           <span>Average response</span>
           <strong>
-            {finished ? `${result.averageLatency.toFixed(2)} s` : '—'}
+            {`${(started ? result.requests.reduce(
+              (sum, request) => sum + Math.max(0, Math.min(time, request.end) - request.arrival),
+              0,
+            ) / result.requests.length : 0).toFixed(2)} s`}
           </strong>
         </div>
         <div>
           <span>Throughput</span>
           <strong>
-            {finished ? `${result.throughput.toFixed(2)} req/s` : '—'}
+            {`${(started && time > 0 ? done.length / Math.min(time, result.total) : 0).toFixed(2)} req/s`}
           </strong>
         </div>
       </div>

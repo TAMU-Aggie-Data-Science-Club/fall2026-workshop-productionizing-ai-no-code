@@ -315,12 +315,12 @@ export function Playground() {
           <div className="metrics playground-metrics">
             <Metric
               label="First visible token"
-              value={`${result.firstVisible.toFixed(2)} s`}
+              value={`${Math.min(time, result.firstVisible).toFixed(2)} s`}
               note="First request"
             />
             <Metric
               label="Workload complete"
-              value={`${result.total.toFixed(2)} s`}
+              value={`${Math.min(time, result.total).toFixed(2)} s`}
               note={`${result.requests.length} requests · ${result.cacheHits} cache hits`}
             />
             <Metric

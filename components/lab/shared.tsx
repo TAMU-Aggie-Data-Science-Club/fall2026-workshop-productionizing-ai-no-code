@@ -2,8 +2,10 @@
 import { useEffect, useId, useState } from 'react';
 import { ArrowRight, Play, RotateCcw } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { Field } from '@base-ui/react/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
+import { useActivityProgress } from './activity-progress';
 export function Range({
   label,
   value,
@@ -11,6 +13,7 @@ export function Range({
   max,
   step = 1,
   unit = '',
+  formatValue = (n: number) => String(n),
   onChange,
 }: {
   label: string;
@@ -19,15 +22,16 @@ export function Range({
   max: number;
   step?: number;
   unit?: string;
+  formatValue?: (n: number) => string;
   onChange: (n: number) => void;
 }) {
   const id = useId();
   return (
-    <div className="control">
+    <Field.Root className="control">
       <div className="control-label">
-        <label id={id}>{label}</label>
+        <Field.Label id={id}>{label}</Field.Label>
         <output>
-          {value}
+          {formatValue(value)}
           {unit}
         </output>
       </div>
@@ -43,15 +47,15 @@ export function Range({
       />
       <div className="range-ends">
         <span>
-          {min}
+          {formatValue(min)}
           {unit}
         </span>
         <span>
-          {max}
+          {formatValue(max)}
           {unit}
         </span>
       </div>
-    </div>
+    </Field.Root>
   );
 }
 export function Choice({
@@ -102,6 +106,7 @@ export function Toggle({
   );
 }
 export function usePlayback(duration: number) {
+  const { markInteracted } = useActivityProgress();
   const [elapsed, setElapsed] = useState(0),
     [running, setRunning] = useState(false),
     [runId, setRunId] = useState(0),
@@ -126,6 +131,7 @@ export function usePlayback(duration: number) {
     running,
     started,
     run: () => {
+      markInteracted();
       setElapsed(0);
       setStarted(true);
       setRunId((n) => n + 1);

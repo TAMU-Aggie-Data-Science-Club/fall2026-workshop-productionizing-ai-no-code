@@ -1,0 +1,182 @@
+﻿.billing-demo {
+  container-type: inline-size;
+}
+.billing-messages {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  gap: 20px;
+  padding: 28px;
+  min-height: 245px;
+}
+.billing-message-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.billing-message-heading > span:last-child {
+  color: var(--soft);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.billing-input-group + .billing-input-group {
+  margin-top: 12px;
+}
+.billing-reference-label {
+  display: block;
+  margin: 18px 0 8px;
+  color: var(--soft);
+  font-size: 0.8rem;
+}
+.billing-token-text {
+  font-size: 1rem;
+  line-height: 2.15;
+  overflow-wrap: anywhere;
+}
+.billing-token {
+  display: inline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 2px 1px;
+  margin-right: 2px;
+  transition:
+    background 180ms,
+    border-color 180ms;
+}
+.billing-input .billing-token {
+  color: var(--soft);
+}
+.billing-input.is-counted .billing-token,
+.billing-output .billing-token {
+  background: var(--muted);
+  border-color: #ccc;
+  color: var(--foreground);
+}
+.billing-token.unrevealed {
+  visibility: hidden;
+}
+.billing-token.just-generated {
+  animation: billing-token-arrival 220ms ease-out;
+}
+@keyframes billing-token-arrival {
+  from {
+    background: var(--foreground);
+    color: var(--background);
+  }
+  to {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+}
+.billing-flow-arrow {
+  align-self: center;
+  color: #aaa;
+}
+.billing-answer {
+  position: relative;
+  min-height: 120px;
+}
+.billing-answer-placeholder {
+  position: absolute;
+  inset: 4px 0 auto;
+  color: var(--soft);
+  font-size: 1rem;
+}
+.billing-metrics .metric strong {
+  font-size: clamp(1.1rem, 3.2cqi, 1.625rem);
+}
+.billing-cost-track {
+  height: 4px;
+  overflow: hidden;
+  background: var(--line);
+  border-radius: 2px;
+  margin-top: 14px;
+}
+.billing-cost-track > span {
+  display: block;
+  height: 100%;
+  background: var(--foreground);
+  transition: width 100ms linear;
+}
+.billing-volume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding: 18px 24px;
+}
+.billing-volume > span {
+  color: var(--soft);
+  font-size: 0.875rem;
+}
+.billing-volume-equation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.billing-volume-equation > span {
+  color: var(--soft);
+}
+.billing-volume-equation > output {
+  font-family: 'Lora Variable', Georgia, serif;
+  font-size: 1.625rem;
+}
+.billing-volume-control {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.billing-volume-control .control {
+  margin-bottom: 0;
+}
+.billing-footnote {
+  margin-top: 14px;
+  font-size: 0.8rem;
+  color: var(--soft);
+}
+@container (max-width: 520px) {
+  .billing-messages {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 22px;
+    gap: 18px;
+  }
+  .billing-flow-arrow {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+  .billing-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .billing-metrics .metric {
+    border-left: 0;
+  }
+  .billing-metrics .metric + .metric {
+    border-top: 1px solid var(--line);
+  }
+  .billing-metrics .metric strong {
+    font-size: 1.625rem;
+  }
+}
+@media (max-width: 800px) {
+  .billing-layout .billing-controls {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .billing-token,
+  .billing-cost-track > span {
+    transition: none;
+  }
+  .billing-token.just-generated {
+    animation: none;
+  }
+}

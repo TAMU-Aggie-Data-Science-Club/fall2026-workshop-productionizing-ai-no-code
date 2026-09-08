@@ -1,0 +1,227 @@
+/* A quiet landscape, soft reveals, and a simple paper welcome card. */
+.welcome {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #91b2cd;
+  color: var(--welcome-ink);
+}
+.welcome-landscape,
+.welcome-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.welcome-landscape {
+  transform: scale(1.025);
+  transition: transform 1.3s var(--welcome-ease), filter 1.1s ease;
+}
+.welcome-landscape-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 54%;
+  filter: saturate(0.86) blur(0.35px);
+  animation: landscape-drift 36s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.welcome-atmosphere {
+  z-index: -1;
+  background: linear-gradient(180deg, #2e485a18, transparent 25%, transparent 65%, #22312432);
+}
+.welcome-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.065;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.91' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23888' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+.welcome-center {
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+}
+.welcome-card {
+  width: min(100%, 510px);
+  position: relative;
+  border: 1px solid #ffffffb3;
+  border-radius: 18px;
+  background: #faf9f6ed;
+  box-shadow: 0 2px 5px #28372f06, 0 24px 80px -12px #233b5033, inset 0 0 0 5px #ffffff26;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  text-align: center;
+  animation: welcome-card-in 1.35s var(--welcome-ease) both;
+}
+.welcome-card-content {
+  padding: 34px 46px;
+  transition: opacity 240ms ease, transform 500ms var(--welcome-ease), filter 320ms ease;
+}
+.welcome-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--welcome-ink);
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 550;
+  letter-spacing: 0.17em;
+}
+.welcome-brand img {
+  width: 34px;
+  height: 39px;
+  object-fit: contain;
+}
+.welcome h1 {
+  margin: 22px -16px 0;
+  color: var(--welcome-ink);
+  font-size: clamp(36px, 4.5vw, 49px);
+  line-height: 1.16;
+  letter-spacing: -2.3px;
+  font-weight: 400;
+}
+.welcome h1 em {
+  display: block;
+  text-align: center;
+  transform: translateX(0.35em);
+  font-weight: 400;
+  font-style: italic;
+}
+.welcome-topics {
+  width: 100%;
+  max-width: 326px;
+  margin: 24px auto 0;
+  padding: 0;
+  list-style: none;
+  color: #6c746b;
+  font-family: 'Lora Variable', Georgia, serif;
+  font-size: 12px;
+  line-height: 1.8;
+  text-align: right;
+}
+.welcome-topics li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.welcome-topic-number {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.welcome-topic-leader {
+  flex: 1;
+  min-width: 12px;
+  border-bottom: 1px dotted currentColor;
+  opacity: 0.65;
+  transform: translateY(-2px);
+}
+.welcome-action {
+  margin-top: 26px;
+}
+/* Keyboard users can enter immediately without waiting for the intro. */
+.welcome-card:focus-within { animation: none; }
+.welcome-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  gap: 24px;
+  min-height: 54px;
+  padding: 16px 24px;
+  border: 1px solid #cbb593;
+  border-radius: 8px;
+  background: #d8c3a5;
+  color: #493b2b;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 3px 7px #6852380a, inset 0 1px 0 #ffffff30;
+  transition: background 250ms ease, transform 350ms var(--welcome-ease), box-shadow 350ms ease;
+}
+.welcome-start svg { transition: transform 400ms var(--welcome-ease); }
+@media (hover: hover) {
+  .welcome-start:hover {
+    transform: translateY(-2px);
+    background: #ccb28e;
+    box-shadow: 0 7px 16px #68523820, inset 0 1px 0 #ffffff30;
+  }
+  .welcome-start:hover svg { transform: translateX(5px); }
+}
+.welcome-start:active { transform: translateY(0) scale(0.985); }
+.welcome-start:focus-visible,
+.welcome-brand:focus-visible { outline: 2px solid var(--welcome-ink); outline-offset: 5px; }
+.welcome-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--background);
+  opacity: 0;
+  pointer-events: none;
+}
+.welcome[data-leaving] { cursor: progress; }
+.welcome[data-leaving] .welcome-curtain { pointer-events: auto; }
+.welcome[data-leaving] .welcome-card-content {
+  opacity: 0;
+  transform: translateY(-12px);
+  filter: blur(4px);
+}
+.welcome[data-leaving] .welcome-landscape { transform: scale(1.1); filter: blur(5px); }
+
+/* Resolve out of the same paper color used by the expanding welcome card. */
+.lesson-entrance .masthead { animation: lesson-settle 650ms var(--welcome-ease) both; }
+.lesson-entrance .section-intro { animation: lesson-settle 760ms 70ms var(--welcome-ease) both; }
+.lesson-entrance .lab-layout,
+.lesson-entrance .playground-layout { animation: lesson-settle 850ms 150ms var(--welcome-ease) both; }
+.lesson-entrance .lesson-pagination { animation: lesson-settle 800ms 230ms var(--welcome-ease) both; }
+@keyframes landscape-drift {
+  from { transform: scale(1.045) translate3d(-0.6%, 0.2%, 0); }
+  to { transform: scale(1.1) translate3d(0.6%, -0.5%, 0); }
+}
+@keyframes welcome-card-in {
+  from { opacity: 0; transform: translate3d(0, 22px, 0) scale(0.975); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes lesson-settle {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (max-width: 600px) {
+  .welcome-center { padding: 36px 20px; }
+  .welcome-card-content { padding: 34px 30px 36px; }
+  .welcome h1 { font-size: clamp(32px, 8.7vw, 46px); letter-spacing: -1.8px; }
+  .welcome-landscape-image { object-position: 48% 50%; }
+}
+@media (max-width: 360px) {
+  .welcome-card-content { padding-inline: 23px; }
+}
+@media (max-height: 600px) and (min-width: 601px) {
+  .welcome-center { padding-block: 32px; }
+  .welcome-card-content { padding-block: 30px; }
+  .welcome h1 { margin-top: 20px; }
+  .welcome-action { margin-top: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome *,
+  .lesson-entrance .masthead,
+  .lesson-entrance .section-intro,
+  .lesson-entrance .lab-layout,
+  .lesson-entrance .playground-layout,
+  .lesson-entrance .lesson-pagination {
+    animation: none;
+    transition: none;
+    will-change: auto;
+  }
+  .welcome-start:hover,
+  .welcome-start:active,
+  .welcome-start:hover svg { transform: none; }
+}

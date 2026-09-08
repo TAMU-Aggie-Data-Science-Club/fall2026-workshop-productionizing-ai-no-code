@@ -6,6 +6,14 @@
   "outputDirectory": "dist/client",
   "cleanUrls": true,
   "redirects": [
-    { "source": "/", "destination": "/streaming", "permanent": false }
+    { "source": "/", "destination": "/prod-ai", "permanent": false },
+    {
+      "source": "/:lesson(streaming|tokens|retrieval|caching|queues|batching|quality|playground)",
+      "destination": "/prod-ai/:lesson",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    { "source": "/prod-ai/:path*", "destination": "/:path*" }
   ]
 }

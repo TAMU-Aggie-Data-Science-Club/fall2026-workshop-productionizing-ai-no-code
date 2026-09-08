@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Check, X, FileText, RotateCcw, Play } from 'lucide-react';
 import {
-  tokenCost,
   schedule,
   capacityCost,
   cacheRequest,
@@ -28,146 +27,7 @@ import {
   StagePath,
 } from './shared';
 
-export function TokensCost() {
-  const [input, setInput] = useState(240),
-    [output, setOutput] = useState(80),
-    [volume, setVolume] = useState(1000);
-  const [run, setRun] = useState({ input: 240, output: 80, volume: 1000 });
-  const p = usePlayback(4);
-  const a = Math.min(1, p.elapsed / 1.5),
-    b = Math.max(0, Math.min(1, (p.elapsed - 1.5) / 2.5));
-  const result = tokenCost(run.input, run.output, run.volume);
-  const pending =
-    input !== run.input || output !== run.output || volume !== run.volume;
-  return (
-    <>
-      <Intro
-        title="Tokens & cost"
-        text="Input, output, and request volume determine the bill."
-      />
-      <div className="lab-layout">
-        <section className="demo-box">
-          <DemoTop
-            title="Token usage"
-            running={p.running}
-            started={p.started}
-          />
-          <div className="token-demo">
-            <div className="token-group">
-              <div className="token-group-label">
-                <span>Input tokens</span>
-                <strong>
-                  {Math.floor(run.input * a)} <small>/ {run.input}</small>
-                </strong>
-              </div>
-              <p>Instructions, question, and references</p>
-              <div className="token-grid">
-                {Array.from({ length: run.input / 20 }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`token-block input ${i < Math.ceil((run.input * a) / 20) ? 'filled' : ''}`}
-                  >
-                    20
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="token-bridge">
-              <span />
-              <ArrowRight size={19} />
-              <span className="model-chip">LLM</span>
-              <ArrowRight size={19} />
-              <span />
-            </div>
-            <div className="token-group">
-              <div className="token-group-label">
-                <span>Output tokens</span>
-                <strong>
-                  {Math.floor(run.output * b)} <small>/ {run.output}</small>
-                </strong>
-              </div>
-              <p>Generated answer</p>
-              <div className="token-grid">
-                {Array.from({ length: run.output / 20 }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`token-block output ${i < Math.ceil((run.output * b) / 20) ? 'filled' : ''}`}
-                  >
-                    20
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="rate-note">
-              20 tokens per block. Example rates per million tokens: $1 input ·
-              $3 output.
-            </div>
-          </div>
-          <div className="metrics">
-            <Metric
-              label="Input cost"
-              value={`$${(result.inputCost * a).toFixed(3)}`}
-              note={`Across ${run.volume.toLocaleString()} requests`}
-            />
-            <Metric
-              label="Output cost"
-              value={`$${(result.outputCost * b).toFixed(3)}`}
-            />
-            <Metric
-              label="Combined cost"
-              value={`$${(result.inputCost * a + result.outputCost * b).toFixed(3)}`}
-              note="Model usage only"
-            />
-          </div>
-        </section>
-        <aside className="controls">
-          <span className="eyebrow">Configs</span>
-          <Range
-            label="Prompt length"
-            value={input}
-            min={40}
-            max={800}
-            step={40}
-            unit=" tok"
-            onChange={setInput}
-          />
-          <Range
-            label="Answer length"
-            value={output}
-            min={20}
-            max={240}
-            step={20}
-            unit=" tok"
-            onChange={setOutput}
-          />
-          <Range
-            label="Request volume"
-            value={volume}
-            min={1000}
-            max={100000}
-            step={1000}
-            onChange={setVolume}
-          />
-          <RunButton
-            pending={pending}
-            run={() => {
-              setRun({ input, output, volume });
-              p.run();
-            }}
-            started={p.started}
-            running={p.running}
-          />
-          {p.started && pending && (
-            <p className="control-note">Changes apply on Run.</p>
-          )}
-        </aside>
-      </div>
-      <Observation visible={p.started && !p.running}>
-        Small per-request costs add up with longer answers and more traffic.
-      </Observation>
-    </>
-  );
-}
+export { TokensCost } from './tokens-cost';
 
 export function ContextRetrieval() {
   const [question, setQuestion] = useState('Exam week'),
@@ -381,7 +241,7 @@ export function Caching() {
           <div className="metrics">
             <Metric
               label="Response time"
-              value={result ? `${result.duration.toFixed(2)} s` : '—'}
+              value={`${Math.min(p.elapsed, result?.duration ?? 0).toFixed(2)} s`}
               note={hit ? 'Answer-cache shortcut' : 'Model generation'}
             />
             <Metric
@@ -541,7 +401,11 @@ export function TrafficQueues() {
   const requests = schedule(run.rate, run.workers),
     total = Math.max(...requests.map((r) => r.end));
   const p = usePlayback(total),
-    average = requests.reduce((s, r) => s + r.wait, 0) / requests.length;
+    average =
+      requests.reduce(
+        (s, r) => s + Math.max(0, Math.min(p.elapsed, r.start) - r.arrival),
+        0,
+      ) / requests.length;
   return (
     <>
       <Intro

@@ -133,17 +133,20 @@ export function Streaming() {
           <div className="metrics">
             <Metric
               label="First visible token"
-              value={`${result.firstVisible.toFixed(2)} s`}
+              value={`${Math.min(p.elapsed, result.firstVisible).toFixed(2)} s`}
               note={
                 config.delivery === 'Buffered'
                   ? 'Delivered with the full answer'
                   : 'Time to first token (TTFT)'
               }
             />
-            <Metric label="Generation speed" value={`${config.speed} tok/s`} />
+            <Metric
+              label="Generation speed"
+              value={`${p.started && p.elapsed >= config.wait ? config.speed : 0} tok/s`}
+            />
             <Metric
               label="Full answer"
-              value={`${result.total.toFixed(2)} s`}
+              value={`${Math.min(p.elapsed, result.total).toFixed(2)} s`}
             />
           </div>
         </section>

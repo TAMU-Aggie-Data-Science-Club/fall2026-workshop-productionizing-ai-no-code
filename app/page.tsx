@@ -1,4 +1,5 @@
-import { redirect } from 'next/navigation';
+import { Welcome } from '@/components/lab/welcome';
+
 export default function Home() {
-  redirect('/streaming');
+  return <Welcome />;
 }

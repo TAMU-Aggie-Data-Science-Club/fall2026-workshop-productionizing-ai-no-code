@@ -1,4 +1,4 @@
-﻿@import 'tailwindcss';
+@import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 .batch-clock {
@@ -170,6 +170,10 @@
   --line: #e2dfd8;
   --soft: #727272;
   --success-ink: #343434;
+  --welcome-paper: #faf9f6;
+  --welcome-ink: #303c35;
+  --welcome-muted: #72776e;
+  --welcome-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 * {
   box-sizing: border-box;
@@ -633,87 +637,6 @@ h2 {
   50% {
     opacity: 0;
   }
-}
-.token-demo {
-  padding: 26px 28px;
-}
-.token-group-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 16px;
-}
-
-.token-group-label strong {
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.token-group-label small {
-  color: var(--soft);
-  font-weight: 400;
-  font-size: 12px;
-}
-.token-group > p {
-  color: var(--soft);
-  font-size: 14px;
-  margin: 7px 0 16px;
-}
-.token-grid {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  min-height: 54px;
-}
-.token-block {
-  min-width: 29px;
-  height: 27px;
-  border: 1px solid #e9e5df;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #a3a3a3;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-}
-.token-block.input.filled {
-  background: #ede9e1;
-  color: #616161;
-  border-color: #d7cfc3;
-}
-.token-block.output.filled {
-  background: #deded9;
-  border-color: #aeaeae;
-  color: var(--primary);
-}
-.token-bridge {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  padding: 25px 0;
-  color: #aeaeae;
-}
-.token-bridge > span:not(.model-chip) {
-  width: 40px;
-  height: 1px;
-  background: var(--line);
-}
-.model-chip {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 8px 21px;
-  color: var(--primary);
-  font-size: 13px;
-}
-.rate-note {
-  margin-top: 21px;
-  font-size: 12px;
-  color: var(--soft);
-  line-height: 1.8;
 }
 .document-grid {
   display: grid;
@@ -1285,9 +1208,6 @@ button:disabled {
     margin-right: 20px;
     padding: 17px;
   }
-  .token-demo {
-    padding: 23px 20px;
-  }
   .queue-visual {
     padding: 25px 12px;
     gap: 4px;
@@ -1560,10 +1480,39 @@ button:disabled {
   opacity: 0.4;
 }
 .next-lesson {
+  position: relative;
+  gap: 10px;
+  height: 52px;
+  min-width: 140px;
+  font-weight: 650;
   margin-left: auto;
   background: var(--foreground);
   border-color: var(--foreground);
   color: var(--background);
+}
+a.next-lesson::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: next-lesson-pulse 1.8s ease-out infinite;
+}
+@keyframes next-lesson-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--foreground) 65%, transparent);
+  }
+  40% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--foreground) 35%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 18px color-mix(in srgb, var(--foreground) 0%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  a.next-lesson::after {
+    animation: none;
+  }
 }
 .next-lesson:not(:disabled):hover {
   background: var(--foreground);

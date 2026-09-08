@@ -1,3 +1,4 @@
+'use client';
 import {
   Pagination,
   PaginationContent,
@@ -5,6 +6,9 @@ import {
   PaginationLink,
 } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
+import { ArrowRightIcon } from 'lucide-react';
+import { lessonPath, workshopPath } from '@/lib/paths';
+import { useActivityProgress } from './activity-progress';
 
 export const PAGES = [
   {
@@ -42,7 +46,8 @@ export const PAGES = [
 ];
 
 export function PageNavigation({ current }: { current: string }) {
-  const index = PAGES.findIndex((page) => page.href === current);
+  const { hasInteracted } = useActivityProgress();
+  const index = PAGES.findIndex((page) => page.href === lessonPath(current));
   if (index === -1) return null;
   const previous = PAGES[index - 1];
   const next = PAGES[index + 1];
@@ -54,7 +59,7 @@ export function PageNavigation({ current }: { current: string }) {
             <PaginationLink
               size="default"
               className="lesson-page-link"
-              href={previous.href}
+              href={workshopPath(previous.href)}
               rel="prev"
               role="link"
             >
@@ -67,15 +72,16 @@ export function PageNavigation({ current }: { current: string }) {
           )}
         </PaginationItem>
         <PaginationItem>
-          {next ? (
+          {next && hasInteracted ? (
             <PaginationLink
               size="default"
               className="lesson-page-link next-lesson"
-              href={next.href}
+              href={workshopPath(next.href)}
               rel="next"
               role="link"
             >
               Next
+              <ArrowRightIcon aria-hidden="true" data-icon="inline-end" />
             </PaginationLink>
           ) : (
             <Button disabled className="lesson-page-link next-lesson">

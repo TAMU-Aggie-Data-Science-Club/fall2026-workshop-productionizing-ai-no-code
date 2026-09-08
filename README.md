@@ -13,7 +13,11 @@ npm.cmd ci
 npm.cmd run dev -- --hostname 127.0.0.1
 ```
 
-Open the URL printed by the server (normally http://127.0.0.1:3000). The home URL redirects to `/streaming`. Other independent pages are `/tokens`, `/retrieval`, `/caching`, `/queues`, `/batching`, `/quality`, and `/playground`. Every page supports direct loading and refresh.
+Open the URL printed by the server (normally http://127.0.0.1:3000/prod-ai/). The home URL opens the welcome page, which links to `/prod-ai/streaming`. Other independent pages are `/prod-ai/tokens`, `/prod-ai/retrieval`, `/prod-ai/caching`, `/prod-ai/queues`, `/prod-ai/batching`, `/prod-ai/quality`, and `/prod-ai/playground`. Every page supports direct loading and refresh.
+
+The welcome screen shows the original sky-and-meadow background with subtle grain and a gentle 36-second drift. The card contains the ADSC logo and name, the title, a compact numbered list of workshop topics with dotted leaders, and the start button, each settling into focus with a soft staggered reveal. The topic list uses the same page sequence as lesson navigation. Its native start link also works without animation support or JavaScript. Reduced-motion preferences show everything immediately. Keyboard focus reveals the start button immediately. Returning with the browser's Back button restores the welcome card. The 880 ms paper expansion is followed by a staggered lesson entrance, using the same background color across navigation.
+
+The current backdrop is `public/images/workshop-sky.webp` (1672 × 941), generated with the built-in image-generation tool and compressed to WebP. Generation brief: “A wide natural editorial photograph of a dreamy pale cornflower-blue afternoon sky, warm ivory clouds framing an open center, distant sage meadow along the bottom, softly blurred grasses in the corners, nostalgic 35mm grain and atmospheric softness; no text, UI, people, or logos.” The alternate ground-level wheat image is retained as `public/images/workshop-wheat.webp`.
 
 Each lesson has Previous and Next buttons at the bottom. The takeaway appears after a run; Streaming keeps a compact comparison when settings change between completed runs. Run applies edited settings, Replay repeats unchanged settings, and Restart cancels the active animation.
 On macOS/Linux, use `npm` instead of `npm.cmd`.
@@ -48,6 +52,10 @@ The optional WebMCP playground tool is feature-detected; browsers without that A
 Import this repository into the club's Vercel account. Use the repository root (`./`) and the **Other** framework preset. `vercel.json` sets the install command (`npm ci`), build command (`npm run build`), static output (`dist/client`), and home-page redirect. No environment variables or model credentials are needed.
 
 Use `main` for production and branches for changes and previews. Share the stable production URL with students and add it to the technical workshop README once deployed. Confirm that the production URL opens without a Vercel login.
+
+The custom workshop entry URL is `https://ws.aggiedatascience.org/prod-ai`. Add `ws.aggiedatascience.org` to this Vercel project's Production domains and complete the CNAME/TXT verification in Cloudflare. DNS only configures the hostname; the path is configured in this repository. The same `/prod-ai` paths work on the project's `vercel.app` domain.
+
+`lib/paths.ts` defines the app prefix. Vite uses it for generated asset URLs, while plain navigation links and public images explicitly include it. `vercel.json` redirects `/` and the previously shared root lesson URLs into the workshop, then rewrites `/prod-ai/*` to the static files in `dist/client` (including the welcome page at `/prod-ai`). Keep these rules aligned if the prefix changes. `next.config.ts` enables `basePath` only for the development server; enabling it for production with the current vinext version causes its static prerenderer to skip the lessons. After deploying, check `/prod-ai`, direct lesson refreshes, Previous/Next, the logo, and the old `/streaming` link.
 
 The project retains its Sites scaffold and exports static HTML, JavaScript, CSS, and fonts. Only `dist/client` is deployed; no Python or application server is required. See [Vercel's Git deployment guide](https://vercel.com/docs/git).
 
