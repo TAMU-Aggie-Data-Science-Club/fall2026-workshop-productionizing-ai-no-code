@@ -8,12 +8,10 @@
   "redirects": [
     { "source": "/", "destination": "/prod-ai", "permanent": false },
     {
-      "source": "/:lesson(streaming|tokens|retrieval|caching|queues|batching|quality|playground)",
+      "source": "/:lesson(streaming|tokens|retrieval|caching|queues|batching|quality|playground|challenge)",
       "destination": "/prod-ai/:lesson",
       "permanent": false
     }
   ],
-  "rewrites": [
-    { "source": "/prod-ai/:path*", "destination": "/:path*" }
-  ]
+  "rewrites": [{ "source": "/prod-ai/:path*", "destination": "/:path*" }]
 }

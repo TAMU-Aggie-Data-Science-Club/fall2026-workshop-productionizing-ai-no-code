@@ -43,6 +43,10 @@ export const PAGES = [
     href: '/playground',
     label: 'Playground',
   },
+  {
+    href: '/challenge',
+    label: 'Build your app',
+  },
 ];
 
 export function PageNavigation({ current }: { current: string }) {

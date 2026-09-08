@@ -1,6 +1,6 @@
 # Productionizing an LLM
 
-Standalone visual workshop for Aggie Data Science Club. Seven concept pages and a configurable playground; no model services, accounts, or credentials.
+Standalone visual workshop for Aggie Data Science Club. Seven concept pages, a configurable playground, and a final production challenge; no model services, accounts, or credentials.
 
 This repository contains the browser activity for the nontechnical audience. The [technical workshop](https://github.com/TAMU-Aggie-Data-Science-Club/fall2026-workshop-productionizing-ai) is maintained separately. Attendees use the published website; the commands below are only for officers developing it.
 
@@ -15,7 +15,7 @@ npm.cmd run dev -- --hostname 127.0.0.1
 
 Open the URL printed by the server (normally http://127.0.0.1:3000/prod-ai/). The home URL opens the welcome page, which links to `/prod-ai/streaming`. Other independent pages are `/prod-ai/tokens`, `/prod-ai/retrieval`, `/prod-ai/caching`, `/prod-ai/queues`, `/prod-ai/batching`, `/prod-ai/quality`, and `/prod-ai/playground`. Every page supports direct loading and refresh.
 
-The welcome screen shows the original sky-and-meadow background with subtle grain and a gentle 36-second drift. The card contains the ADSC logo and name, the title, a compact numbered list of workshop topics with dotted leaders, and the start button, each settling into focus with a soft staggered reveal. The topic list uses the same page sequence as lesson navigation. Its native start link also works without animation support or JavaScript. Reduced-motion preferences show everything immediately. Keyboard focus reveals the start button immediately. Returning with the browser's Back button restores the welcome card. The 880 ms paper expansion is followed by a staggered lesson entrance, using the same background color across navigation.
+The welcome screen shows the original sky-and-meadow background with subtle grain and a gentle 36-second drift. The card contains the ADSC logo and name, the title, a compact numbered list of workshop topics with dotted leaders, and a dark green start button. The card and all of its contents enter together in one soft animation. The topic list uses the same page sequence as lesson navigation. Its native start link also works without animation support or JavaScript. Reduced-motion preferences show everything immediately. Keyboard focus reveals the entire card immediately. Returning with the browser's Back button restores the welcome card. The 880 ms paper expansion is followed by a staggered lesson entrance, using the same background color across navigation.
 
 The current backdrop is `public/images/workshop-sky.webp` (1672 × 941), generated with the built-in image-generation tool and compressed to WebP. Generation brief: “A wide natural editorial photograph of a dreamy pale cornflower-blue afternoon sky, warm ivory clouds framing an open center, distant sage meadow along the bottom, softly blurred grasses in the corners, nostalgic 35mm grain and atmospheric softness; no text, UI, people, or logos.” The alternate ground-level wheat image is retained as `public/images/workshop-wheat.webp`.
 
@@ -46,6 +46,16 @@ npm.cmd run build
 `lib/simulation.ts` owns timing, costs, caching, and scheduling. `lib/content.ts` owns reference documents and prepared answers. No browser storage or analytics are used.
 
 The optional WebMCP playground tool is feature-detected; browsers without that API use the same regular interface.
+
+## Final challenge
+
+`/prod-ai/challenge` follows Playground. Students configure model, context, output length, worker count, delivery, and caching, then test the same 20-request workload. It contains ten questions and ten repeats; two source facts change before the second wave. Each request uses the source version available at arrival. Every test starts with an empty cache, and only completed matching responses can be reused.
+
+The requirements are at least 18 correct answers, a 90th-percentile first visible response within two seconds, a 90th-percentile full answer within six seconds, a total test cost no higher than 0.65 cents, and no outdated cache hits. Percentiles use the nearest-rank method and include queue wait. Token rates, worker prices, and generation timing come from the same shared rules as the lessons and Playground. Worker time is charged for all configured workers throughout the test. Prices remain fictional educational rates.
+
+Accuracy is calculated from the visible prepared questions and answers, not a universal model quality percentage. Missing context, omitted exceptions, insufficient output length, selected model-specific mistakes, and stale responses can fail an answer. Extra context includes a worked policy example that helps the lightweight model with the two exception cases. Every answer and its expected reference can be reviewed after a run. Tests enumerate the configuration space to confirm multiple passing approaches and meaningful failures for the default and largest configurations.
+
+A passing test transitions to a full-screen ending, using the welcome landscape and a wide summary card with the exact passing configuration and statistics. The root React provider holds the result in memory while it replaces the lesson screen; nothing is written to storage or a URL. Refresh returns to the initial challenge. Reduced motion skips the transitions; reset and unmount cancel pending exits.
 
 ## Publish on Vercel
 

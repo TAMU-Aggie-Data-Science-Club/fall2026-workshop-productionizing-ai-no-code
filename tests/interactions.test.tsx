@@ -41,6 +41,15 @@ globalThis.ResizeObserver = class {
   unobserve() {}
   disconnect() {}
 };
+// jsdom has no layout; give the slider track and thumb measurable geometry.
+const nativeBounds = HTMLElement.prototype.getBoundingClientRect;
+HTMLElement.prototype.getBoundingClientRect = function () {
+  if (this.hasAttribute('data-base-ui-slider-control'))
+    return new dom.window.DOMRect(0, 0, 240, 16);
+  if (this.getAttribute('data-slot') === 'slider-thumb')
+    return new dom.window.DOMRect(0, 0, 12, 12);
+  return nativeBounds.call(this);
+};
 const { render, cleanup, fireEvent, act, renderHook } =
   await import('@testing-library/react');
 const { PageNavigation, PAGES } =
@@ -48,6 +57,13 @@ const { PageNavigation, PAGES } =
 const { Streaming } = await import('../components/lab/streaming');
 const { Caching, TokensCost } = await import('../components/lab/lessons');
 const { Playground } = await import('../components/lab/playground');
+const { Challenge } = await import('../components/lab/challenge');
+const { Completion } = await import('../components/lab/completion');
+const { CompletionContext } =
+  await import('../components/lab/completion-state');
+const { CompletionProvider } =
+  await import('../components/lab/completion-provider');
+const { simulateChallenge } = await import('../lib/challenge');
 const { usePlayback } = await import('../components/lab/shared');
 const { ActivityProgress, useActivityProgress } =
   await import('../components/lab/activity-progress');
@@ -93,10 +109,20 @@ test('lesson navigation offers adjacent pages without a persistent topic list', 
     '/prod-ai/queues',
   );
   view.rerender(<NavigationFixture current="/playground" />);
-  assert.equal(view.getAllByRole('link').length, 1);
+  assert.equal(view.getAllByRole('link').length, 2);
   assert.equal(
     view.getByRole('link', { name: 'Previous' }).getAttribute('href'),
     '/prod-ai/quality',
+  );
+  assert.equal(
+    view.getByRole('link', { name: 'Next' }).getAttribute('href'),
+    '/prod-ai/challenge',
+  );
+  view.rerender(<NavigationFixture current="/prod-ai/challenge" />);
+  assert.equal(view.getAllByRole('link').length, 1);
+  assert.equal(
+    view.getByRole('link', { name: 'Previous' }).getAttribute('href'),
+    '/prod-ai/playground',
   );
   assert.ok(
     view.getByRole('button', { name: 'Next' }).hasAttribute('disabled'),
@@ -120,15 +146,25 @@ test('each page entry renders its own heading and working demonstration', async 
     assert.ok(view.getByRole('heading', { level: 1, name: page.label }));
     assert.ok(
       view.getByRole('button', {
-        name: page.href === '/caching' ? 'Send question' : 'Run',
+        name:
+          page.href === '/caching'
+            ? 'Send question'
+            : page.href === '/challenge'
+              ? 'Test'
+              : 'Run',
       }),
     );
     fireEvent.click(
       view.getByRole('button', {
-        name: page.href === '/caching' ? 'Send question' : 'Run',
+        name:
+          page.href === '/caching'
+            ? 'Send question'
+            : page.href === '/challenge'
+              ? 'Test'
+              : 'Run',
       }),
     );
-    if (page.href !== '/playground') {
+    if (page.href !== '/challenge') {
       assert.ok(view.getByRole('link', { name: 'Next' }));
       assert.ok(view.container.querySelector('a.next-lesson'));
     }
@@ -338,6 +374,223 @@ test('playground retains completed comparison and reset clears it', () => {
   assert.equal(view.queryByText('Run comparison'), null);
   assert.ok(view.getByRole('button', { name: 'Run' }));
 });
+async function choosePassingChallenge(view: ReturnType<typeof render>) {
+  await act(async () => {});
+  fireEvent.click(view.getByRole('radio', { name: 'Capable' }));
+  const context = view.getByRole('slider', { name: 'Retrieved context' });
+  fireEvent.keyDown(context, { key: 'Home' });
+  fireEvent.keyDown(context, { key: 'ArrowRight' });
+  fireEvent.keyDown(context, { key: 'ArrowRight' });
+  const length = view.getByRole('slider', { name: 'Answer length' });
+  fireEvent.keyDown(length, { key: 'Home' });
+  fireEvent.keyDown(length, { key: 'ArrowRight' });
+  fireEvent.keyDown(view.getByRole('slider', { name: 'Workers' }), {
+    key: 'End',
+  });
+  fireEvent.click(view.getByRole('radio', { name: 'Streamed' }));
+  fireEvent.click(view.getByRole('radio', { name: 'Refresh on update' }));
+}
+
+test('challenge tests changed configs, retains comparisons, replays and resets', async () => {
+  const view = render(<Challenge />);
+  assert.equal(view.queryByRole('region', { name: 'Test results' }), null);
+  fireEvent.click(view.getByRole('button', { name: 'Test' }));
+  assert.ok(view.getByRole('heading', { name: 'Keep adjusting' }));
+  assert.ok(view.getByText('The prompt had no source material.'));
+  await choosePassingChallenge(view);
+  assert.ok(view.getByText('Changes apply on the next test.'));
+  assert.ok(
+    view.getByRole('heading', { name: 'Keep adjusting' }),
+    'draft edits do not change the last result',
+  );
+  fireEvent.click(view.getByRole('button', { name: 'Test' }));
+  assert.ok(view.getByRole('heading', { name: 'Requirements met' }));
+  assert.ok(
+    view
+      .getByRole('table', { name: 'Test comparison' })
+      .textContent?.includes('0 / 20'),
+  );
+  const comparison = view.getByRole('table', {
+    name: 'Test comparison',
+  }).textContent;
+  fireEvent.click(view.getByRole('button', { name: 'Replay' }));
+  assert.equal(
+    view.getByRole('table', { name: 'Test comparison' }).textContent,
+    comparison,
+  );
+  fireEvent.click(view.getByRole('button', { name: 'Review all 20 answers' }));
+  assert.equal(
+    view.container.querySelectorAll('.challenge-answer-audit article').length,
+    20,
+  );
+  fireEvent.click(view.getByRole('button', { name: 'Reset' }));
+  assert.equal(view.queryByRole('region', { name: 'Test results' }), null);
+  assert.equal(view.queryByRole('table', { name: 'Test comparison' }), null);
+  assert.equal(
+    view
+      .getByRole('slider', { name: 'Retrieved context' })
+      .getAttribute('aria-valuenow'),
+    '0',
+  );
+  assert.ok(view.getByRole('button', { name: 'Test' }));
+});
+
+test('only a passing run hands its exact configuration and statistics to the ending screen', async () => {
+  const completed: import('../components/lab/completion-state').CompletedBuild[] =
+    [];
+  const finish = (
+    build: import('../components/lab/completion-state').CompletedBuild,
+  ) => completed.push(build);
+  const view = render(
+    <CompletionContext.Provider value={{ build: null, finish }}>
+      <Challenge />
+    </CompletionContext.Provider>,
+  );
+  fireEvent.click(view.getByRole('button', { name: 'Test' }));
+  assert.equal(completed.length, 0);
+  await choosePassingChallenge(view);
+  fireEvent.click(view.getByRole('button', { name: 'Test' }));
+  assert.equal(completed.length, 1);
+  assert.equal(completed[0].result.passed, true);
+  assert.deepEqual(completed[0].result, simulateChallenge(completed[0].config));
+  view.rerender(
+    <CompletionContext.Provider value={{ build: completed[0], finish }}>
+      <Completion />
+    </CompletionContext.Provider>,
+  );
+  assert.ok(view.getByRole('heading', { name: 'Requirements met.' }));
+  assert.ok(view.getByText('Capable'));
+  assert.ok(view.getByText('Refresh on update'));
+  assert.ok(view.getByText('20 / 20 correct'));
+  assert.ok(view.getByText(`${(completed[0].result.cost * 100).toFixed(3)}¢`));
+  assert.equal(
+    view.container
+      .querySelector('.welcome-landscape-image')
+      ?.getAttribute('src'),
+    '/prod-ai/images/workshop-sky.webp',
+  );
+});
+
+test('the ending screen has a useful fallback without inventing a passing result', () => {
+  const view = render(<Completion />);
+  assert.equal(view.queryByText('Requirements met.'), null);
+  assert.equal(
+    view.getByRole('link', { name: 'Open challenge' }).getAttribute('href'),
+    '/prod-ai/challenge',
+  );
+});
+
+test('the actual completion provider replaces the challenge with its passing result', async () => {
+  const view = render(
+    <CompletionProvider>
+      <Challenge />
+    </CompletionProvider>,
+  );
+  await choosePassingChallenge(view);
+  fireEvent.click(view.getByRole('button', { name: 'Test' }));
+  assert.equal(view.queryByRole('button', { name: 'Test' }), null);
+  assert.ok(view.getByRole('main', { name: 'Requirements met.' }));
+  assert.ok(view.getByText('Capable'));
+  assert.ok(view.getByText('20 / 20 correct'));
+  assert.equal(document.activeElement, view.getByRole('main'));
+  view.unmount();
+  const fresh = render(
+    <CompletionProvider>
+      <Challenge />
+    </CompletionProvider>,
+  );
+  assert.ok(fresh.getByRole('button', { name: 'Test' }));
+  assert.equal(fresh.queryByText('Requirements met.'), null);
+});
+
+test('reset and unmount cancel a pending transition to the ending screen', async () => {
+  const originalMedia = window.matchMedia;
+  const originalInterval = window.setInterval;
+  const originalClearInterval = window.clearInterval;
+  const originalTimeout = window.setTimeout;
+  const originalClearTimeout = window.clearTimeout;
+  const originalAnimate = HTMLElement.prototype.animate;
+  let now = 0;
+  let tick = () => {};
+  const timers = new Map<number, () => void>();
+  let cancelled = 0;
+  let finished = 0;
+  let timerId = 0;
+  const clock = mock.method(performance, 'now', () => now);
+  window.matchMedia = () => ({ ...originalMedia(''), matches: false });
+  window.setInterval = ((callback: () => void) => {
+    tick = callback;
+    return 1;
+  }) as typeof window.setInterval;
+  window.clearInterval = () => {};
+  window.setTimeout = ((callback: () => void) => {
+    timers.set(++timerId, callback);
+    return timerId;
+  }) as typeof window.setTimeout;
+  window.clearTimeout = ((id: number) => {
+    timers.delete(id);
+  }) as typeof window.clearTimeout;
+  HTMLElement.prototype.animate = () => {
+    let reject!: (error: Error) => void;
+    return {
+      finished: new Promise<Animation>((_resolve, fail) => {
+        reject = fail;
+      }),
+      cancel() {
+        cancelled++;
+        reject(new Error('Cancelled'));
+      },
+    } as Animation;
+  };
+  try {
+    const view = render(
+      <CompletionContext.Provider
+        value={{
+          build: null,
+          finish: () => {
+            finished++;
+          },
+        }}
+      >
+        <Challenge />
+      </CompletionContext.Provider>,
+    );
+    await choosePassingChallenge(view);
+    fireEvent.click(view.getByRole('button', { name: 'Test' }));
+    assert.equal(view.queryByRole('region', { name: 'Test results' }), null);
+    act(() => {
+      now = 20000;
+      tick();
+    });
+    assert.ok(view.getByRole('heading', { name: 'Requirements met' }));
+    fireEvent.click(view.getByRole('button', { name: 'Reset' }));
+    assert.equal(timers.size, 0);
+    assert.equal(finished, 0);
+    await choosePassingChallenge(view);
+    fireEvent.click(view.getByRole('button', { name: 'Test' }));
+    act(() => {
+      now = 40000;
+      tick();
+    });
+    act(() => {
+      for (const callback of timers.values()) callback();
+      timers.clear();
+    });
+    await act(async () => view.unmount());
+    assert.equal(cancelled, 1);
+    assert.equal(finished, 0);
+  } finally {
+    clock.mock.restore();
+    window.matchMedia = originalMedia;
+    window.setInterval = originalInterval;
+    window.clearInterval = originalClearInterval;
+    window.setTimeout = originalTimeout;
+    window.clearTimeout = originalClearTimeout;
+    if (originalAnimate) HTMLElement.prototype.animate = originalAnimate;
+    else Reflect.deleteProperty(HTMLElement.prototype, 'animate');
+  }
+});
+
 test('playback restarts, resets, and cancels intervals when unmounted', () => {
   const original = window.matchMedia,
     originalSet = window.setInterval,

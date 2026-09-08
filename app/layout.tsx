@@ -4,6 +4,9 @@ import '@fontsource-variable/inter';
 import './globals.css';
 import '@/components/lab/welcome.css';
 import '@/components/lab/tokens-cost.css';
+import '@/components/lab/challenge.css';
+import '@/components/lab/completion.css';
+import { CompletionProvider } from '@/components/lab/completion-provider';
 import { SiteFrame } from '@/components/lab/site-frame';
 import { workshopPath } from '@/lib/paths';
 export const metadata: Metadata = {
@@ -18,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <SiteFrame>{children}</SiteFrame>
+        <CompletionProvider>
+          <SiteFrame>{children}</SiteFrame>
+        </CompletionProvider>
       </body>
     </html>
   );
