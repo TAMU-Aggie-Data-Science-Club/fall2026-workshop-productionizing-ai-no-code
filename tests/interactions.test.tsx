@@ -42,7 +42,7 @@ globalThis.ResizeObserver = class {
 };
 const { render, cleanup, fireEvent, act, renderHook } =
   await import('@testing-library/react');
-const { PageNavigation, TopicDirectory, PAGES } =
+const { PageNavigation, PAGES } =
   await import('../components/lab/page-navigation');
 const { Streaming } = await import('../components/lab/streaming');
 const { Caching } = await import('../components/lab/lessons');
@@ -51,45 +51,36 @@ const { usePlayback } = await import('../components/lab/shared');
 afterEach(async () => {
   await act(async () => cleanup());
 });
-test('the topic directory links to eight independent lessons', () => {
-  const view = render(<TopicDirectory />);
-  assert.equal(view.getAllByRole('link').length, 8);
-  assert.equal(view.queryAllByRole('tab').length, 0);
-  for (const page of PAGES) {
-    const link = view.getByRole('link', {
-      name: `${page.label} ${page.question}`,
-    });
-    assert.equal(link.getAttribute('href'), page.href);
-  }
-});
-
 test('lesson navigation offers adjacent pages without a persistent topic list', () => {
   const view = render(<PageNavigation current="/streaming" />);
   assert.equal(view.getAllByRole('link').length, 1);
   assert.equal(
-    view.getByRole('link', { name: 'Next Tokens & cost' }).getAttribute('href'),
+    view.getByRole('link', { name: 'Next' }).getAttribute('href'),
     '/tokens',
+  );
+  assert.ok(
+    view.getByRole('button', { name: 'Previous' }).hasAttribute('disabled'),
   );
   view.rerender(<PageNavigation current="/caching" />);
   assert.equal(view.getAllByRole('link').length, 2);
   assert.equal(
-    view
-      .getByRole('link', { name: 'Previous Context & retrieval' })
-      .getAttribute('href'),
+    view.getByRole('link', { name: 'Previous' }).getAttribute('href'),
     '/retrieval',
   );
   assert.equal(
-    view
-      .getByRole('link', { name: 'Next Traffic & queues' })
-      .getAttribute('href'),
+    view.getByRole('link', { name: 'Next' }).getAttribute('href'),
     '/queues',
   );
   view.rerender(<PageNavigation current="/playground" />);
+  assert.equal(view.getAllByRole('link').length, 1);
   assert.equal(
-    view.getByRole('link', { name: 'Explore All topics' }).getAttribute('href'),
-    '/topics',
+    view.getByRole('link', { name: 'Previous' }).getAttribute('href'),
+    '/quality',
   );
-  view.rerender(<PageNavigation current="/topics" />);
+  assert.ok(
+    view.getByRole('button', { name: 'Next' }).hasAttribute('disabled'),
+  );
+  view.rerender(<PageNavigation current="/missing" />);
   assert.equal(view.queryByRole('navigation'), null);
 });
 test('each page entry renders its own heading and working demonstration', async () => {

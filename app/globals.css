@@ -1473,21 +1473,6 @@ button:disabled {
 .concept-page {
   min-width: 0;
 }
-.lesson-toolbar {
-  margin-bottom: 24px;
-  font-size: 14px;
-}
-.lesson-toolbar a {
-  color: var(--soft);
-  text-decoration: none;
-  display: inline-block;
-  padding: 7px 0;
-}
-.lesson-toolbar a:hover {
-  color: var(--foreground);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
 .section-intro {
   padding: 0 0 28px;
 }
@@ -1539,65 +1524,38 @@ button:disabled {
 }
 .lesson-page-link {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-  padding: 8px 0;
-  height: auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  height: 46px;
+  min-width: 112px;
   width: fit-content;
   max-width: 100%;
-  white-space: normal;
-  border: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
   box-shadow: none;
-  background: none;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
 }
-.lesson-page-link span {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--soft);
+.lesson-page-link:not(:disabled):hover {
+  background: var(--muted);
 }
-.lesson-page-link strong {
-  font-family: 'Lora Variable', Georgia, serif;
-  font-size: 23px;
-  font-weight: 400;
-  line-height: 1.4;
-}
-.lesson-page-link:hover {
-  background: none;
-}
-.lesson-page-link:hover strong {
-  text-decoration: underline;
-  text-underline-offset: 5px;
+.lesson-page-link:disabled {
+  opacity: 0.4;
 }
 .next-lesson {
   margin-left: auto;
-  align-items: flex-end;
-  text-align: right;
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
 }
-.topic-directory {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 40px;
-}
-.topic-directory a {
-  display: block;
-  padding: 26px 0;
-  border-bottom: 1px solid var(--line);
-  text-decoration: none;
-  color: var(--foreground);
-}
-.topic-directory h2 {
-  margin: 0;
-  font-size: 27px;
-}
-.topic-directory p {
-  margin-top: 8px;
-  color: var(--soft);
-  font-size: 16px;
-}
-.topic-directory a:hover h2 {
-  text-decoration: underline;
-  text-underline-offset: 6px;
+.next-lesson:not(:disabled):hover {
+  background: var(--foreground);
+  color: var(--background);
+  opacity: 0.85;
 }
 .streaming-comparison {
   max-width: calc(100% - 280px);
@@ -1677,9 +1635,6 @@ button:disabled {
   .page-layout {
     padding-top: 20px;
   }
-  .lesson-toolbar {
-    margin-bottom: 17px;
-  }
   .section-intro {
     padding-bottom: 23px;
   }
@@ -1694,21 +1649,7 @@ button:disabled {
   .streaming-comparison {
     max-width: 100%;
   }
-  .lesson-page-link strong {
-    font-size: 20px;
-  }
   .lesson-pagination {
     margin-top: 28px;
-  }
-}
-@media (max-width: 550px) {
-  .topic-directory {
-    grid-template-columns: 1fr;
-  }
-  .topic-directory a {
-    padding: 21px 0;
-  }
-  .topic-directory h2 {
-    font-size: 24px;
   }
 }

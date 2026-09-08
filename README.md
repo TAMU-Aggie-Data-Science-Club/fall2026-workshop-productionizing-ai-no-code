@@ -15,7 +15,7 @@ npm.cmd run dev -- --hostname 127.0.0.1
 
 Open the URL printed by the server (normally http://127.0.0.1:3000). The home URL redirects to `/streaming`. Other independent pages are `/tokens`, `/retrieval`, `/caching`, `/queues`, `/batching`, `/quality`, and `/playground`. Every page supports direct loading and refresh.
 
-Each lesson has Previous/Next navigation. `/topics` lists all lessons without keeping a sidebar beside the activity. The takeaway appears after a run; Streaming keeps a compact comparison when settings change between completed runs. Run applies edited settings, Replay repeats unchanged settings, and Restart cancels the active animation.
+Each lesson has Previous and Next buttons at the bottom. The takeaway appears after a run; Streaming keeps a compact comparison when settings change between completed runs. Run applies edited settings, Replay repeats unchanged settings, and Restart cancels the active animation.
 On macOS/Linux, use `npm` instead of `npm.cmd`.
 
 ## Checks

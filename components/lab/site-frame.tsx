@@ -25,16 +25,9 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
           />
           <span>Aggie Data Science Club</span>
         </a>
-        <a href="/topics" className="site-title">
-          Productionizing an LLM
-        </a>
+        <span className="site-title">Productionizing AI</span>
       </header>
       <div className="page-layout">
-        {pathname !== '/topics' && (
-          <nav className="lesson-toolbar" aria-label="Workshop">
-            <a href="/topics">Topics</a>
-          </nav>
-        )}
         <main id="main" className="concept-page" key={pathname}>
           {children}
           <PageNavigation current={pathname} />
