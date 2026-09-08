@@ -25,6 +25,7 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
           />
           <span>Aggie Data Science Club</span>
         </a>
+        <span className="masthead-divider" aria-hidden="true" />
         <span className="site-title">Productionizing AI</span>
       </header>
       <div className="page-layout">

@@ -1448,15 +1448,27 @@ button:disabled {
 }
 .masthead {
   height: 100px;
-  gap: 28px;
+  justify-content: flex-start;
+  gap: 24px;
 }
 .club-brand {
   gap: 13px;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 .club-logo {
   width: 45px;
   height: 51px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+.masthead-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--line);
+  flex-shrink: 0;
 }
 .site-title {
   color: var(--foreground);
@@ -1464,6 +1476,7 @@ button:disabled {
   text-decoration: none;
   font-size: 23px;
   letter-spacing: -0.6px;
+  white-space: nowrap;
 }
 .page-layout {
   max-width: 1100px;
@@ -1619,15 +1632,14 @@ button:disabled {
     height: auto;
     min-height: 88px;
     padding: 16px 0;
-    flex-wrap: wrap;
-    gap: 13px;
+    gap: 18px;
   }
   .club-logo {
     width: 36px;
     height: 41px;
   }
   .club-brand {
-    font-size: 14px;
+    font-size: 20px;
   }
   .site-title {
     font-size: 20px;
@@ -1651,5 +1663,22 @@ button:disabled {
   }
   .lesson-pagination {
     margin-top: 28px;
+  }
+}
+@media (max-width: 600px) {
+  .masthead {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .club-brand {
+    width: 100%;
+    font-size: clamp(17px, 4.5vw, 20px);
+  }
+  .masthead-divider {
+    display: none;
+  }
+  .site-title {
+    margin-left: 49px;
+    font-size: 18px;
   }
 }
