@@ -5,6 +5,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
   "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     { "source": "/", "destination": "/prod-ai", "permanent": false },
     {
