@@ -159,10 +159,12 @@ export function RunButton({
   run,
   started,
   running,
+  pending = false,
 }: {
   run: () => void;
   started: boolean;
   running: boolean;
+  pending?: boolean;
 }) {
   return (
     <button className="run-button" onClick={run}>
@@ -171,19 +173,21 @@ export function RunButton({
       ) : (
         <Play size={16} fill="currentColor" />
       )}
-      {running
-        ? 'Restart demonstration'
-        : started
-          ? 'Replay demonstration'
-          : 'Run demonstration'}
+      {running ? 'Restart' : started && !pending ? 'Replay' : 'Run'}
     </button>
   );
 }
-export function Observation({ children }: { children: React.ReactNode }) {
+export function Observation({
+  children,
+  visible,
+}: {
+  children: React.ReactNode;
+  visible: boolean;
+}) {
+  if (!visible) return null;
   return (
     <div className="observation">
       <div>
-        <span className="eyebrow">What to notice</span>
         <p>{children}</p>
       </div>
     </div>
@@ -238,7 +242,7 @@ export function DemoTop({
       <span className="eyebrow">{title}</span>
       <span className={`status ${running ? 'live' : ''}`}>
         <i />
-        {running ? 'Running' : started ? 'Complete' : 'Ready to run'}
+        {running ? 'Running' : started ? 'Complete' : 'Ready'}
       </span>
     </div>
   );

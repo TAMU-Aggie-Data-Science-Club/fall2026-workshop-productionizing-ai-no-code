@@ -2,6 +2,15 @@
 import { useState } from 'react';
 import { TOKENS, streaming } from '@/lib/simulation';
 import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Range,
   Choice,
   usePlayback,
@@ -19,6 +28,11 @@ export function Streaming() {
     speed: 12,
     delivery: 'Streamed',
   });
+  const [previous, setPrevious] = useState<{
+    delivery: string;
+    firstVisible: number;
+    total: number;
+  } | null>(null);
   const result = streaming(
     config.wait,
     config.speed,
@@ -47,19 +61,12 @@ export function Streaming() {
       <div className="section-intro">
         <div>
           <h1>Streaming</h1>
-          <p>
-            An answer can start quickly and finish slowly. Those are two
-            different things to optimize.
-          </p>
+          <p>An answer can start quickly and finish slowly.</p>
         </div>
       </div>
       <div className="lab-layout">
         <section className="demo-box" aria-label="Streaming demonstration">
-          <DemoTop
-            title="Response, in real time"
-            running={p.running}
-            started={p.started}
-          />
+          <DemoTop title="Response" running={p.running} started={p.started} />
           <div className="prompt-line">
             <span className="eyebrow">You</span>
             <p>Why do leaves change color in the fall?</p>
@@ -85,9 +92,9 @@ export function Streaming() {
                 <span className="placeholder">
                   {p.running
                     ? config.delivery === 'Buffered' && p.elapsed >= config.wait
-                      ? 'The model is generating. Delivery waits for the full answer.'
+                      ? 'Generating. The answer arrives when complete.'
                       : 'Waiting for the first token…'
-                    : 'Run the demonstration to watch the answer unfold.'}
+                    : 'No answer yet.'}
                 </span>
               )}
               {p.running && <span className="cursor" />}
@@ -133,20 +140,15 @@ export function Streaming() {
                   : 'Time to first token (TTFT)'
               }
             />
-            <Metric
-              label="Generation speed"
-              value={`${config.speed} tok/s`}
-              note="After generation starts"
-            />
+            <Metric label="Generation speed" value={`${config.speed} tok/s`} />
             <Metric
               label="Full answer"
               value={`${result.total.toFixed(2)} s`}
-              note="Total completion time"
             />
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Range
             label="First generated token"
             value={wait}
@@ -172,29 +174,54 @@ export function Streaming() {
             onChange={setDelivery}
           />
           <RunButton
+            pending={pending}
             run={() => {
+              if (pending && p.started && !p.running) {
+                setPrevious({ delivery: config.delivery, ...result });
+              }
               setConfig({ wait, speed, delivery });
               p.run();
             }}
             started={p.started}
             running={p.running}
           />
-          <p className="control-note">
-            {pending
-              ? 'Your changes apply on the next run.'
-              : 'Try the same settings with buffered delivery.'}
-          </p>
+          {pending && p.started && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      <Observation>
-        Streaming changes when you see the answer, not how fast the model
-        generates it. Lower first-token time reduces the initial wait; more
-        tokens per second finishes the answer sooner.
+      {previous && p.started && !p.running && (
+        <div className="streaming-comparison">
+          <Table>
+            <TableCaption>Run comparison</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">Delivery</TableHead>
+                <TableHead scope="col">First visible token</TableHead>
+                <TableHead scope="col">Full answer</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableHead scope="row">
+                  Previous · {previous.delivery}
+                </TableHead>
+                <TableCell>{previous.firstVisible.toFixed(2)} s</TableCell>
+                <TableCell>{previous.total.toFixed(2)} s</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableHead scope="row">Current · {config.delivery}</TableHead>
+                <TableCell>{result.firstVisible.toFixed(2)} s</TableCell>
+                <TableCell>{result.total.toFixed(2)} s</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      )}
+      <Observation visible={p.started && !p.running}>
+        Streaming changes when the answer appears; model timing determines when
+        it finishes.
       </Observation>
-      <p className="fine-print">
-        Prepared token pieces illustrate streaming; actual tokenization varies
-        by model. All timings are simulated.
-      </p>
     </>
   );
 }

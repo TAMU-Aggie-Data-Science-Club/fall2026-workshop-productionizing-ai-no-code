@@ -1,6 +1,5 @@
 ﻿'use client';
 import { usePathname } from 'next/navigation';
-import { SidebarContent } from '@/components/ui/sidebar';
 
 import { PageNavigation } from './page-navigation';
 
@@ -26,22 +25,19 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
           />
           <span>Aggie Data Science Club</span>
         </a>
-        <a href="/streaming" className="site-title">
+        <a href="/topics" className="site-title">
           Productionizing an LLM
         </a>
       </header>
       <div className="page-layout">
-        <aside className="desktop-navigation">
-          <SidebarContent>
-            <PageNavigation current={pathname} />
-          </SidebarContent>
-        </aside>
-        <details className="mobile-navigation">
-          <summary>Pages</summary>
-          <PageNavigation current={pathname} />
-        </details>
+        {pathname !== '/topics' && (
+          <nav className="lesson-toolbar" aria-label="Workshop">
+            <a href="/topics">Topics</a>
+          </nav>
+        )}
         <main id="main" className="concept-page" key={pathname}>
           {children}
+          <PageNavigation current={pathname} />
         </main>
       </div>
     </div>

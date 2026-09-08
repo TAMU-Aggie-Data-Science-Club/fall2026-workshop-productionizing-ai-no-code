@@ -43,12 +43,12 @@ export function TokensCost() {
     <>
       <Intro
         title="Tokens & cost"
-        text="You pay for what goes in and what comes out. Then you do it thousands of times."
+        text="Input, output, and request volume determine the bill."
       />
       <div className="lab-layout">
         <section className="demo-box">
           <DemoTop
-            title="Follow the token budget"
+            title="Token usage"
             running={p.running}
             started={p.started}
           />
@@ -60,7 +60,7 @@ export function TokensCost() {
                   {Math.floor(run.input * a)} <small>/ {run.input}</small>
                 </strong>
               </div>
-              <p>Your instructions, question, and reference material.</p>
+              <p>Instructions, question, and references</p>
               <div className="token-grid">
                 {Array.from({ length: run.input / 20 }, (_, i) => (
                   <span
@@ -86,7 +86,7 @@ export function TokensCost() {
                   {Math.floor(run.output * b)} <small>/ {run.output}</small>
                 </strong>
               </div>
-              <p>The answer the model generates.</p>
+              <p>Generated answer</p>
               <div className="token-grid">
                 {Array.from({ length: run.output / 20 }, (_, i) => (
                   <span
@@ -99,8 +99,8 @@ export function TokensCost() {
               </div>
             </div>
             <div className="rate-note">
-              Each block represents 20 tokens. Fictional rates: $1 / million
-              input tokens · $3 / million output tokens.
+              20 tokens per block. Example rates per million tokens: $1 input ·
+              $3 output.
             </div>
           </div>
           <div className="metrics">
@@ -112,7 +112,6 @@ export function TokensCost() {
             <Metric
               label="Output cost"
               value={`$${(result.outputCost * b).toFixed(3)}`}
-              note="Higher rate per token"
             />
             <Metric
               label="Combined cost"
@@ -122,7 +121,7 @@ export function TokensCost() {
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Range
             label="Prompt length"
             value={input}
@@ -150,6 +149,7 @@ export function TokensCost() {
             onChange={setVolume}
           />
           <RunButton
+            pending={pending}
             run={() => {
               setRun({ input, output, volume });
               p.run();
@@ -157,22 +157,14 @@ export function TokensCost() {
             started={p.started}
             running={p.running}
           />
-          <p className="control-note">
-            {pending
-              ? 'Your changes apply on the next run.'
-              : 'Double the answer length. Then increase the request volume.'}
-          </p>
+          {p.started && pending && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      <Observation>
-        An inexpensive request can become a meaningful bill at scale. Shorter
-        useful answers and relevant context reduce token usage; removing
-        necessary information can hurt the result.
+      <Observation visible={p.started && !p.running}>
+        Small per-request costs add up with longer answers and more traffic.
       </Observation>
-      <p className="fine-print">
-        Token blocks are illustrative. Rates are fictional and intentionally
-        fixed for comparison.
-      </p>
     </>
   );
 }
@@ -188,12 +180,12 @@ export function ContextRetrieval() {
     <>
       <Intro
         title="Context & retrieval"
-        text="Retrieval finds reference material and puts it into the prompt before the model answers."
+        text="Retrieval adds reference material to the prompt."
       />
       <div className="lab-layout">
         <section className="demo-box">
           <DemoTop
-            title="From documents to an answer"
+            title="Sources & answer"
             running={p.running}
             started={p.started}
           />
@@ -217,9 +209,7 @@ export function ContextRetrieval() {
                 <h3>{d.title}</h3>
                 <p>{d.text}</p>
                 <span className="doc-tag">
-                  {d.relevant
-                    ? 'Relevant to this question'
-                    : 'Unrelated information'}
+                  {d.relevant ? 'Relevant' : 'Unrelated'}
                 </span>
               </div>
             ))}
@@ -235,9 +225,7 @@ export function ContextRetrieval() {
               {ready ? answer.state : 'Model response'}
             </span>
             <p className={!ready ? 'muted' : ''}>
-              {ready
-                ? answer.text
-                : 'Run the demonstration to see what the selected context supports.'}
+              {ready ? answer.text : 'No answer yet.'}
             </p>
           </div>
           <div className="context-summary">
@@ -246,7 +234,7 @@ export function ContextRetrieval() {
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Choice
             label="Question"
             value={question}
@@ -261,6 +249,7 @@ export function ContextRetrieval() {
             onChange={setCount}
           />
           <RunButton
+            pending={question !== run.question || count !== run.count}
             run={() => {
               setRun({ question, count });
               p.run();
@@ -268,23 +257,16 @@ export function ContextRetrieval() {
             started={p.started}
             running={p.running}
           />
-          <p className="control-note">
-            {question !== run.question || count !== run.count
-              ? 'Your changes apply on the next run.'
-              : 'Try exam week with one document, then with two.'}
-          </p>
+          {p.started && (question !== run.question || count !== run.count) && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      <Observation>
-        The first document gives the usual hours; the second contains the
-        exception. A cited answer can still be wrong if retrieval misses the
-        information that matters. More unrelated documents add work without
-        adding evidence.
+      <Observation visible={p.started && !p.running}>
+        {run.question === 'Exam week'
+          ? 'Missing the exam-week note changes the answer. Unrelated documents add no evidence.'
+          : 'Relevant notes support the answer. Unrelated documents add no evidence.'}
       </Observation>
-      <p className="fine-print">
-        These library notes and responses are fictional teaching examples. Each
-        document is modeled as 90 tokens.
-      </p>
     </>
   );
 }
@@ -314,12 +296,12 @@ export function Caching() {
     <>
       <Intro
         title="Caching"
-        text="An answer cache skips repeat work. It also needs a plan for when the facts change."
+        text="Reuse a saved answer, even when the source has changed."
       />
       <div className="lab-layout">
         <section className="demo-box">
           <DemoTop
-            title="Ask. Save. Ask again."
+            title="Answer cache"
             running={p.running}
             started={p.started}
           />
@@ -387,7 +369,7 @@ export function Caching() {
             <p>
               {ready
                 ? `The library closes at ${result?.answerVersion === 1 ? '10 p.m.' : '8 p.m.'} tonight.`
-                : 'Send the question to fill the cache, then repeat it.'}
+                : 'No answer yet.'}
             </p>
             {ready && result?.stale && (
               <small>
@@ -405,7 +387,6 @@ export function Caching() {
             <Metric
               label="Model calls"
               value={result ? (hit ? '0' : '1') : '—'}
-              note="For this request"
             />
             <Metric
               label="Model cost"
@@ -415,7 +396,7 @@ export function Caching() {
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Toggle
             label="Answer caching"
             checked={enabled}
@@ -446,27 +427,14 @@ export function Caching() {
               Clear cache
             </button>
           </div>
-          <p className="control-note">
-            First send, then repeat. Next, change the source to 8 p.m. and
-            repeat again. Clear the cache to refresh the answer.
-          </p>
           {p.started && (version !== runVersion || enabled !== runEnabled) && (
-            <p className="control-note">
-              Changed settings apply to the next question. Replay preserves the
-              last request.
-            </p>
+            <p className="control-note">Changes apply to the next question.</p>
           )}
         </aside>
       </div>
-      <Observation>
-        A cache hit avoids a model call. But a quick answer is not necessarily a
-        current answer: use expiration or invalidate saved results when their
-        source changes.
+      <Observation visible={p.started && !p.running}>
+        Reuse saves a model call. Changed facts need a refreshed cache.
       </Observation>
-      <p className="fine-print">
-        This is an exact-answer cache, not a model’s prompt/prefix cache. The
-        shortcut is displayed at its simulated 0.25-second speed.
-      </p>
     </>
   );
 }
@@ -583,12 +551,12 @@ export function TrafficQueues() {
       <div className="lab-layout">
         <section className="demo-box">
           <DemoTop
-            title="Twelve requests, one shared service"
+            title="12 requests"
             running={p.running}
             started={p.started}
           />
           <div className="queue-caption">
-            <span>Each dot is one request.</span>
+            <span>One dot per request</span>
             <strong>{p.elapsed.toFixed(1)} s</strong>
           </div>
           <QueueVisual
@@ -599,9 +567,9 @@ export function TrafficQueues() {
           />
           <div className="queue-explanation">
             <span className="legend-wait" />
-            Waiting time grows with traffic.
+            Queue wait
             <span className="legend-generate" />
-            Each request still needs 1.8 s of processing.
+            1.8 s processing per request
           </div>
           <div className="metrics">
             <Metric
@@ -609,20 +577,16 @@ export function TrafficQueues() {
               value={`${average.toFixed(2)} s`}
               note="Across all 12 requests"
             />
-            <Metric
-              label="Processing time"
-              value="1.80 s"
-              note="Unchanged by worker count"
-            />
+            <Metric label="Processing time" value="1.80 s" />
             <Metric
               label="Capacity cost"
               value={`$${capacityCost(run.workers).toFixed(2)}/h`}
-              note="Fictional worker-hour rate"
+              note="Example rate"
             />
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Range
             label="Incoming requests"
             value={rate}
@@ -639,6 +603,7 @@ export function TrafficQueues() {
             onChange={setWorkers}
           />
           <RunButton
+            pending={rate !== run.rate || workers !== run.workers}
             run={() => {
               setRun({ rate, workers });
               p.run();
@@ -646,22 +611,15 @@ export function TrafficQueues() {
             started={p.started}
             running={p.running}
           />
-          <p className="control-note">
-            {rate !== run.rate || workers !== run.workers
-              ? 'Your changes apply on the next run.'
-              : 'Add workers and watch the waiting line shrink. Each worker adds actual capacity in this simulation.'}
-          </p>
+          {p.started && (rate !== run.rate || workers !== run.workers) && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      <Observation>
-        Queue time is time spent waiting for capacity—not generating an answer.
-        More workers can reduce it, but they cost money. Raising a concurrency
-        setting alone does not create more compute.
+      <Observation visible={p.started && !p.running}>
+        More workers reduce queue wait. Each request still takes the same
+        processing time.
       </Observation>
-      <p className="fine-print">
-        Deterministic first-come, first-served queue. Requests run to
-        completion; no retries, batching, or rejected traffic in this example.
-      </p>
     </>
   );
 }
@@ -678,12 +636,12 @@ export function QualityChecks() {
     <>
       <Intro
         title="Quality checks"
-        text="Check the answer against requirements and evidence—not just how convincing it sounds."
+        text="Check whether an answer is supported and complete."
       />
       <div className="lab-layout">
         <section className="demo-box">
           <DemoTop
-            title="Inspect the answer, then the checks"
+            title="Answer checks"
             running={p.running}
             started={p.started}
           />
@@ -699,7 +657,7 @@ export function QualityChecks() {
             </p>
           </div>
           <div className="answer-card quality-answer">
-            <span className="eyebrow">Prepared answer</span>
+            <span className="eyebrow">Answer</span>
             <p>{data.answers[type]}</p>
           </div>
           <div className="check-list">
@@ -730,15 +688,15 @@ export function QualityChecks() {
           <div className="quality-note">
             {revealed === 3
               ? type === 'Grounded'
-                ? 'These checks pass. You still need broader examples and human review.'
+                ? 'All three checks pass for this example.'
                 : type === 'Unsupported'
                   ? 'A citation is present, but the claim does not match the source.'
-                  : 'An answer can contain true facts while leaving part of the question unanswered.'
-              : 'Run the checks to reveal what this small test catches.'}
+                  : 'The answer leaves part of the question unanswered.'
+              : 'Checks pending'}
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Choice
             label="Test example"
             value={example}
@@ -746,12 +704,13 @@ export function QualityChecks() {
             onChange={setExample}
           />
           <Choice
-            label="Answer configuration"
+            label="Answer type"
             value={config}
             options={['Grounded', 'Unsupported', 'Incomplete']}
             onChange={setConfig}
           />
           <RunButton
+            pending={example !== run.example || config !== run.config}
             run={() => {
               setRun({ example, config });
               p.run();
@@ -759,22 +718,15 @@ export function QualityChecks() {
             started={p.started}
             running={p.running}
           />
-          <p className="control-note">
-            {example !== run.example || config !== run.config
-              ? 'Your changes apply on the next run.'
-              : 'Try an unsupported answer. Notice which checks it still passes.'}
-          </p>
+          {p.started && (example !== run.example || config !== run.config) && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      <Observation>
-        Good evaluation uses multiple checks. Citation presence does not prove
-        support, and factual correctness does not prove completeness. A few
-        passing examples cannot establish reliability for every user.
+      <Observation visible={p.started && !p.running}>
+        A citation can be wrong, and a true answer can be incomplete. Broader
+        reliability needs more examples and human review.
       </Observation>
-      <p className="fine-print">
-        Check results are authored for these prepared examples. This
-        demonstration does not evaluate free-form text.
-      </p>
     </>
   );
 }

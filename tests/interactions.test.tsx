@@ -42,7 +42,7 @@ globalThis.ResizeObserver = class {
 };
 const { render, cleanup, fireEvent, act, renderHook } =
   await import('@testing-library/react');
-const { PageNavigation, PAGES } =
+const { PageNavigation, TopicDirectory, PAGES } =
   await import('../components/lab/page-navigation');
 const { Streaming } = await import('../components/lab/streaming');
 const { Caching } = await import('../components/lab/lessons');
@@ -51,18 +51,46 @@ const { usePlayback } = await import('../components/lab/shared');
 afterEach(async () => {
   await act(async () => cleanup());
 });
-test('navigation links to eight independent pages instead of tab panels', () => {
-  const view = render(<PageNavigation current="/caching" />);
+test('the topic directory links to eight independent lessons', () => {
+  const view = render(<TopicDirectory />);
   assert.equal(view.getAllByRole('link').length, 8);
   assert.equal(view.queryAllByRole('tab').length, 0);
   for (const page of PAGES) {
-    const link = view.getByRole('link', { name: page.label });
+    const link = view.getByRole('link', {
+      name: `${page.label} ${page.question}`,
+    });
     assert.equal(link.getAttribute('href'), page.href);
-    assert.equal(
-      link.getAttribute('aria-current'),
-      page.href === '/caching' ? 'page' : null,
-    );
   }
+});
+
+test('lesson navigation offers adjacent pages without a persistent topic list', () => {
+  const view = render(<PageNavigation current="/streaming" />);
+  assert.equal(view.getAllByRole('link').length, 1);
+  assert.equal(
+    view.getByRole('link', { name: 'Next Tokens & cost' }).getAttribute('href'),
+    '/tokens',
+  );
+  view.rerender(<PageNavigation current="/caching" />);
+  assert.equal(view.getAllByRole('link').length, 2);
+  assert.equal(
+    view
+      .getByRole('link', { name: 'Previous Context & retrieval' })
+      .getAttribute('href'),
+    '/retrieval',
+  );
+  assert.equal(
+    view
+      .getByRole('link', { name: 'Next Traffic & queues' })
+      .getAttribute('href'),
+    '/queues',
+  );
+  view.rerender(<PageNavigation current="/playground" />);
+  assert.equal(
+    view.getByRole('link', { name: 'Explore All topics' }).getAttribute('href'),
+    '/topics',
+  );
+  view.rerender(<PageNavigation current="/topics" />);
+  assert.equal(view.queryByRole('navigation'), null);
 });
 test('each page entry renders its own heading and working demonstration', async () => {
   for (const page of PAGES) {
@@ -71,7 +99,7 @@ test('each page entry renders its own heading and working demonstration', async 
     assert.ok(view.getByRole('heading', { level: 1, name: page.label }));
     assert.ok(
       view.getByRole('button', {
-        name: page.href === '/caching' ? 'Send question' : 'Run demonstration',
+        name: page.href === '/caching' ? 'Send question' : 'Run',
       }),
     );
     await act(async () => view.unmount());
@@ -79,18 +107,40 @@ test('each page entry renders its own heading and working demonstration', async 
 });
 test('streaming replays deterministically and stages delivery changes', () => {
   const view = render(<Streaming />);
-  fireEvent.click(view.getByRole('button', { name: 'Run demonstration' }));
+  assert.equal(view.queryByRole('table', { name: 'Run comparison' }), null);
+  assert.equal(
+    view.queryByText(/Streaming changes when the answer appears/),
+    null,
+  );
+  fireEvent.click(view.getByRole('button', { name: 'Run' }));
   const answer = view.container.querySelector('.response-text')?.textContent;
   assert.ok(answer?.includes('chlorophyll'));
-  fireEvent.click(view.getByRole('button', { name: 'Replay demonstration' }));
+  fireEvent.click(view.getByRole('button', { name: 'Replay' }));
   assert.equal(
     view.container.querySelector('.response-text')?.textContent,
     answer,
   );
   fireEvent.click(view.getByRole('radio', { name: 'Buffered' }));
-  assert.ok(view.getByText('Your changes apply on the next run.'));
-  fireEvent.click(view.getByRole('button', { name: 'Replay demonstration' }));
+  assert.ok(view.getByText('Changes apply on Run.'));
+  fireEvent.click(view.getByRole('button', { name: 'Run' }));
   assert.ok(view.getByText('Delivered with the full answer'));
+  const comparison = view.getByRole('table', { name: 'Run comparison' });
+  assert.ok(comparison.textContent?.includes('Previous · Streamed'));
+  assert.ok(comparison.textContent?.includes('Current · Buffered'));
+  const rows = comparison.querySelectorAll('tbody tr');
+  assert.equal(rows[0].children[1].textContent, '1.20 s');
+  assert.equal(rows[1].children[1].textContent, '4.12 s');
+  assert.equal(
+    rows[0].children[2].textContent,
+    rows[1].children[2].textContent,
+  );
+  fireEvent.click(view.getByRole('button', { name: 'Replay' }));
+  assert.ok(
+    view
+      .getByRole('table', { name: 'Run comparison' })
+      .textContent?.includes('Previous · Streamed'),
+  );
+  assert.ok(view.getByText(/Streaming changes when the answer appears/));
 });
 test('cache repeats expose stale answers and clearing refreshes the source', () => {
   const view = render(<Caching />);
@@ -107,13 +157,13 @@ test('cache repeats expose stale answers and clearing refreshes the source', () 
 });
 test('playground retains completed comparison and reset clears it', () => {
   const view = render(<Playground />);
-  fireEvent.click(view.getByRole('button', { name: 'Run demonstration' }));
+  fireEvent.click(view.getByRole('button', { name: 'Run' }));
   fireEvent.click(view.getByRole('radio', { name: 'Lightweight' }));
-  fireEvent.click(view.getByRole('button', { name: 'Replay demonstration' }));
-  assert.ok(view.getByText('Previous → current configuration'));
-  fireEvent.click(view.getByRole('button', { name: 'Reset playground' }));
-  assert.equal(view.queryByText('Previous → current configuration'), null);
-  assert.ok(view.getByRole('button', { name: 'Run demonstration' }));
+  fireEvent.click(view.getByRole('button', { name: 'Run' }));
+  assert.ok(view.getByText('Run comparison'));
+  fireEvent.click(view.getByRole('button', { name: 'Reset' }));
+  assert.equal(view.queryByText('Run comparison'), null);
+  assert.ok(view.getByRole('button', { name: 'Run' }));
 });
 test('playback restarts, resets, and cancels intervals when unmounted', () => {
   const original = window.matchMedia,

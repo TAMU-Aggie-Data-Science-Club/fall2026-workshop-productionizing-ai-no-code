@@ -141,17 +141,17 @@ export function Batching() {
     <>
       <Intro
         title="Batching"
-        text="Process requests together to share the work. Waiting to form a batch can delay the first response."
+        text="Grouping requests shares work but can add waiting time."
       />
       <div className="lab-layout">
         <section className="demo-box">
           <DemoTop
-            title="Same requests. Same processor."
+            title="12 requests · one processor"
             started={p.started}
             running={p.running}
           />
           <div className="batch-clock">
-            <span>Each dot is a request.</span>
+            <span>One dot per request</span>
             <span>
               {time.toFixed(1)} s
               {total > 14 ? ` · ${(total / 14).toFixed(1)}× playback` : ''}
@@ -173,7 +173,7 @@ export function Batching() {
           />
         </section>
         <aside className="controls">
-          <span className="eyebrow">Adjust & observe</span>
+          <span className="eyebrow">Configs</span>
           <Range
             label="Maximum batch size"
             value={draft.size}
@@ -200,6 +200,7 @@ export function Batching() {
             onChange={(rate) => setDraft((d) => ({ ...d, rate }))}
           />
           <RunButton
+            pending={pending}
             started={p.started}
             running={p.running}
             run={() => {
@@ -207,29 +208,15 @@ export function Batching() {
               p.run();
             }}
           />
-          <p className="control-note">
-            {pending
-              ? 'Your changes apply on the next run.'
-              : 'Try a longer collection window with light traffic, then increase the traffic.'}
-          </p>
-          <p className="control-note">
-            A batch starts when full or when the oldest request’s collection
-            window ends, once the processor is free.
-          </p>
+          {p.started && pending && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      <Observation>
-        With enough traffic, grouping requests can clear the queue sooner. With
-        light traffic, waiting for a group may only delay the response.
-        Throughput measures completed requests per second; response time
-        measures how long a person waits.
+      <Observation visible={p.started && !p.running}>
+        Batching can increase throughput while making the first person wait
+        longer.
       </Observation>
-      <p className="fine-print">
-        Illustrative fixed batches of equal-length requests. Each batch takes
-        1.2 s plus 0.12 s per additional request. Throughput is measured across
-        the full 12-request run. Continuous batching can add new requests while
-        others are still generating.
-      </p>
     </>
   );
 }

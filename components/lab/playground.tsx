@@ -167,7 +167,7 @@ export function Playground() {
     <>
       <Intro
         title="Playground"
-        text="Configure the application, send a workload, and see the tradeoffs play out together."
+        text="Compare speed, cost, and answers across configurations."
       />
       <div className="lab-layout playground-layout">
         <section className="demo-box">
@@ -293,9 +293,7 @@ export function Playground() {
                   {p.running && progress < 1 && <span className="cursor" />}
                 </>
               ) : (
-                <span className="muted">
-                  Run your configuration to see an example answer.
-                </span>
+                <span className="muted">No answer yet.</span>
               )}
             </p>
             {p.started && !p.running && (
@@ -304,13 +302,13 @@ export function Playground() {
                   ? 'The answer uses the exam-week exception.'
                   : focus.answer === 'partial'
                     ? config.context < 2
-                      ? 'The exam-week exception was not included in the retrieved context.'
-                      : 'This prepared lightweight response misses the exception, even though it was retrieved.'
+                      ? 'The exam-week note was not retrieved.'
+                      : 'This answer misses the retrieved exam-week exception.'
                     : focus.answer === 'missing'
-                      ? 'Without reference material, the model cannot establish the current hours.'
+                      ? 'The current hours need reference material.'
                       : focus.answer === 'incomplete'
-                        ? 'The short output budget leaves this answer unfinished.'
-                        : 'Inspect whether this answer gives the user what they need.'}
+                        ? 'The output limit cuts the answer short.'
+                        : null}
               </small>
             )}
           </div>
@@ -333,7 +331,7 @@ export function Playground() {
           </div>
         </section>
         <aside className="controls">
-          <span className="eyebrow">Build a configuration</span>
+          <span className="eyebrow">Configs</span>
           <Choice
             label="Model"
             value={draft.model}
@@ -376,6 +374,7 @@ export function Playground() {
             onChange={(v) => set('workload', v as Workload)}
           />
           <RunButton
+            pending={pending}
             run={() => start(draft)}
             started={p.started}
             running={p.running}
@@ -392,18 +391,16 @@ export function Playground() {
             }}
           >
             <RotateCcw size={14} />
-            Reset playground
+            Reset
           </button>
-          <p className="control-note">
-            {pending
-              ? 'Your changes apply on the next run.'
-              : 'Each run starts with an empty cache. Repeats can reuse answers completed earlier in that run.'}
-          </p>
+          {p.started && pending && (
+            <p className="control-note">Changes apply on Run.</p>
+          )}
         </aside>
       </div>
-      {previous && (
+      {previous && p.started && !p.running && (
         <div className="comparison">
-          <span className="eyebrow">Previous → current configuration</span>
+          <span className="eyebrow">Run comparison</span>
           <div className="comparison-heading">
             <span>
               {previous.config.model} · {previous.config.context} docs ·{' '}
@@ -444,18 +441,10 @@ export function Playground() {
           </div>
         </div>
       )}
-      <Observation>
-        Change one setting and replay the same workload. Look at both the
-        response and the measurements. A smaller model can suit an easy
-        question; references, answer length, reuse, and capacity change
-        different parts of the result.
+      <Observation visible={p.started && !p.running}>
+        Compare the same workload. A faster response is only useful if it
+        answers the question.
       </Observation>
-      <p className="fine-print">
-        All results are illustrative. Prepared responses are excerpts, not live
-        generated text or exact tokenizations. Model rates match Tokens & cost;
-        worker costs match Traffic & queues. A cache hit requires an earlier
-        matching request to have finished.
-      </p>
     </>
   );
 }

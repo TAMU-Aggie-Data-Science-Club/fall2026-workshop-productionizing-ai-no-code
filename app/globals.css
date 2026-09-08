@@ -1441,10 +1441,10 @@ button:disabled {
   }
 }
 
-/* A separate document for every concept. */
+/* Focused lesson pages. */
 .site-shell {
-  max-width: 1500px;
-  padding: 0 42px 48px;
+  max-width: 1300px;
+  padding: 0 40px 40px;
 }
 .masthead {
   height: 100px;
@@ -1466,47 +1466,27 @@ button:disabled {
   letter-spacing: -0.6px;
 }
 .page-layout {
-  display: grid;
-  grid-template-columns: 170px minmax(0, 1fr);
-  column-gap: 40px;
-  padding-top: 37px;
-}
-.desktop-navigation {
-  padding-top: 8px;
-}
-.desktop-navigation [data-slot='sidebar-content'] {
-  position: sticky;
-  top: 32px;
-  overflow: visible;
-}
-.page-navigation {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.page-navigation a {
-  display: block;
-  padding: 11px 13px;
-  margin-left: -13px;
-  color: var(--soft);
-  font-size: 14px;
-  text-decoration: none;
-  border-radius: 5px;
-}
-.page-navigation a:hover {
-  color: var(--primary);
-  background: #f2eeea;
-}
-.page-navigation a[aria-current='page'] {
-  color: var(--primary);
-  background: #eee7e3;
-  font-weight: 500;
-}
-.page-navigation a:last-child {
-  margin-top: 19px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 30px;
 }
 .concept-page {
   min-width: 0;
+}
+.lesson-toolbar {
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+.lesson-toolbar a {
+  color: var(--soft);
+  text-decoration: none;
+  display: inline-block;
+  padding: 7px 0;
+}
+.lesson-toolbar a:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .section-intro {
   padding: 0 0 28px;
@@ -1520,21 +1500,130 @@ button:disabled {
   line-height: 1.7;
 }
 .lab-layout {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) 256px;
   gap: 24px;
 }
 .controls {
   padding: 24px 20px;
 }
+.controls > .eyebrow {
+  font-size: 14px;
+}
 .observation {
-  padding-top: 24px;
+  display: block;
+  padding-top: 20px;
+  max-width: calc(100% - 280px);
 }
-.fine-print {
-  padding-left: 0;
-  max-width: 900px;
+.observation p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.7;
 }
-.mobile-navigation {
-  display: none;
+.lesson-pagination {
+  border-top: 1px solid var(--line);
+  margin-top: 36px;
+  padding-top: 22px;
+}
+.lesson-pagination ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lesson-pagination li {
+  min-width: 0;
+}
+.lesson-page-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 8px 0;
+  height: auto;
+  width: fit-content;
+  max-width: 100%;
+  white-space: normal;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+.lesson-page-link span {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--soft);
+}
+.lesson-page-link strong {
+  font-family: 'Lora Variable', Georgia, serif;
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.lesson-page-link:hover {
+  background: none;
+}
+.lesson-page-link:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.next-lesson {
+  margin-left: auto;
+  align-items: flex-end;
+  text-align: right;
+}
+.topic-directory {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 40px;
+}
+.topic-directory a {
+  display: block;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--foreground);
+}
+.topic-directory h2 {
+  margin: 0;
+  font-size: 27px;
+}
+.topic-directory p {
+  margin-top: 8px;
+  color: var(--soft);
+  font-size: 16px;
+}
+.topic-directory a:hover h2 {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+.streaming-comparison {
+  max-width: calc(100% - 280px);
+  margin-top: 24px;
+}
+.streaming-comparison caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 14px;
+  color: var(--foreground);
+  margin: 0 0 10px;
+}
+.streaming-comparison th,
+.streaming-comparison td {
+  font-size: 14px;
+  font-weight: 400;
+  padding: 12px 8px;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+}
+.streaming-comparison thead th {
+  color: var(--soft);
+}
+.streaming-comparison tbody tr:last-child {
+  background: var(--muted);
 }
 .skip-link {
   position: absolute;
@@ -1548,13 +1637,9 @@ button:disabled {
 .skip-link:focus {
   top: 10px;
 }
-@media (max-width: 1200px) {
+@media (max-width: 1000px) {
   .site-shell {
-    padding: 0 28px 40px;
-  }
-  .page-layout {
-    grid-template-columns: 155px minmax(0, 1fr);
-    column-gap: 26px;
+    padding: 0 28px 36px;
   }
   .lab-layout {
     grid-template-columns: minmax(0, 1fr) 235px;
@@ -1563,25 +1648,12 @@ button:disabled {
   .controls {
     padding: 22px 17px;
   }
-  .metric {
-    padding: 17px 12px;
-  }
-  .metric strong {
-    font-size: 24px;
+  .observation,
+  .streaming-comparison {
+    max-width: calc(100% - 253px);
   }
 }
-@media (max-width: 1020px) and (min-width: 761px) {
-  .lab-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .controls {
-    width: 100%;
-  }
-  .section-intro h1 {
-    font-size: 34px;
-  }
-}
-@media (max-width: 760px) {
+@media (max-width: 800px) {
   .site-shell {
     padding: 0 20px 32px;
   }
@@ -1597,37 +1669,19 @@ button:disabled {
     height: 41px;
   }
   .club-brand {
-    font-size: 13px;
+    font-size: 14px;
   }
   .site-title {
     font-size: 20px;
   }
   .page-layout {
-    display: block;
-    padding-top: 0;
+    padding-top: 20px;
   }
-  .desktop-navigation {
-    display: none;
-  }
-  .mobile-navigation {
-    display: block;
-    margin: 15px 0 26px;
-    border-bottom: 1px solid var(--line);
-  }
-  .mobile-navigation summary {
-    cursor: pointer;
-    padding: 10px 0 14px;
-    color: var(--soft);
-    font-size: 14px;
-  }
-  .mobile-navigation .page-navigation {
-    padding: 0 13px 15px;
-  }
-  .mobile-navigation .page-navigation a:last-child {
-    margin-top: 5px;
+  .lesson-toolbar {
+    margin-bottom: 17px;
   }
   .section-intro {
-    padding: 0 0 23px;
+    padding-bottom: 23px;
   }
   .section-intro h1 {
     font-size: 32px;
@@ -1635,5 +1689,26 @@ button:disabled {
   .lab-layout {
     display: flex;
     flex-direction: column;
+  }
+  .observation,
+  .streaming-comparison {
+    max-width: 100%;
+  }
+  .lesson-page-link strong {
+    font-size: 20px;
+  }
+  .lesson-pagination {
+    margin-top: 28px;
+  }
+}
+@media (max-width: 550px) {
+  .topic-directory {
+    grid-template-columns: 1fr;
+  }
+  .topic-directory a {
+    padding: 21px 0;
+  }
+  .topic-directory h2 {
+    font-size: 24px;
   }
 }
