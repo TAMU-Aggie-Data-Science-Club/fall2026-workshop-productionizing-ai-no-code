@@ -137,23 +137,23 @@
   gap: 24px;
   min-height: 54px;
   padding: 16px 24px;
-  border: 1px solid #cbb593;
+  border: 1px solid #344239;
   border-radius: 8px;
-  background: #d8c3a5;
-  color: #493b2b;
+  background: var(--welcome-ink);
+  color: #fffdf6;
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.01em;
-  box-shadow: 0 3px 7px #6852380a, inset 0 1px 0 #ffffff30;
+  box-shadow: 0 3px 7px #2034280a, inset 0 1px 0 #ffffff12;
   transition: background 250ms ease, transform 350ms var(--welcome-ease), box-shadow 350ms ease;
 }
 .welcome-start svg { transition: transform 400ms var(--welcome-ease); }
 @media (hover: hover) {
   .welcome-start:hover {
     transform: translateY(-2px);
-    background: #ccb28e;
-    box-shadow: 0 7px 16px #68523820, inset 0 1px 0 #ffffff30;
+    background: #414f42;
+    box-shadow: 0 7px 16px #20342820, inset 0 1px 0 #ffffff12;
   }
   .welcome-start:hover svg { transform: translateX(5px); }
 }
